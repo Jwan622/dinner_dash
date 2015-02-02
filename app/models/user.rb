@@ -5,9 +5,9 @@ class User < ActiveRecord::Base
 
   validates :password, :first_name, :last_name, presence: true
   validates :username, length: { in: 2..32, allow_nil: true }
-  validates :email, uniqueness: true, presence: true
+  validates :email, uniqueness: { case_sensitive: false }, presence: true
 
-  enum role: [:user, :admin]
+  enum role: [:default, :admin]
 
   def valid_email?(email)
     if email_checker(email).nil?
@@ -21,6 +21,7 @@ class User < ActiveRecord::Base
     email.match(/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-.]+$/)
   end
 
-
-
+  def full_name
+    first_name + " " + last_name
+  end
 end

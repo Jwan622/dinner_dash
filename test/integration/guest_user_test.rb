@@ -29,7 +29,7 @@ class GuestUserTest < ActionDispatch::IntegrationTest
 
   test 'a guest user can view home page' do
     visit root_path
-    assert page.has_content?('Coffee House')
+    assert page.has_content?('Cinema Coffee')
   end
 
   test 'a guest user can see all items' do
@@ -53,13 +53,12 @@ class GuestUserTest < ActionDispatch::IntegrationTest
   end
 
   test "registered admin can create category" do
-    skip
     ApplicationController.any_instance.stubs(:current_user).returns(user_admin)
-    visit items_path
-    click_link_or_button "Create Category"
-    fill_in "categories[name]", with: "Merchandise"
+    visit admin_dashboard_path
+    click_link_or_button "Category"
+    fill_in "categories[name]", with: "Blah"
     click_link_or_button "Add Category"
-    assert page.has_content?("Merchandise")
+    assert page.has_content?("Blah")
   end
 
   test "unregistered admin cannot see category" do
@@ -102,9 +101,7 @@ class GuestUserTest < ActionDispatch::IntegrationTest
     click_link_or_button('Create Account')
 
     assert current_path, root_url
-    within('#header') do
-      assert page.has_content?('Welcome, Harry')
-    end
+    assert page.has_content?('Welcome, Harry')
   end
 
   test "if user already exists they can't sign up again" do
@@ -119,9 +116,23 @@ class GuestUserTest < ActionDispatch::IntegrationTest
     fill_in 'signup[email]', with: 'jwan622@example.com'
 
     click_link_or_button('Create Account')
-    save_and_open_page
     within('#flash_notice') do
       assert page.has_content?('Account Already Exists')
     end
+  end
+
+  test "a unauthorized user cannot see another user's order page" do
+    order = create(:order)
+    user = order.user
+
+    visit "/users/#{user.id}/orders/"
+
+    refute page.has_content?("Order History")
+    assert page.has_content?("Nice Try")
+
+    visit "/users/#{user.id}/orders/#{order.id}"
+
+    refute page.has_content?("Order #{order.id}")
+    assert page.has_content?("Nice Try")
   end
 end

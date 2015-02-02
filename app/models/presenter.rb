@@ -1,6 +1,7 @@
 class Presenter
 
-  attr_reader :items, :categories,
+  attr_reader :items, :categories
+  
   def initialize
     @items = Item.all
     @categories = Category.all
@@ -10,6 +11,5 @@ class Presenter
     Category.all.each do |category|
       category.name
     end.uniq
-    require 'pry' ; binding.pry
   end
 end
